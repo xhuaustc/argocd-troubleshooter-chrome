@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 
 interface DiagnosticResultProps {
   content: string
@@ -9,7 +10,8 @@ interface DiagnosticResultProps {
 export function DiagnosticResult({ content, isStreaming }: DiagnosticResultProps) {
   const html = useMemo(() => {
     if (!content) return ''
-    return marked.parse(content, { async: false }) as string
+    const raw = marked.parse(content, { async: false }) as string
+    return DOMPurify.sanitize(raw)
   }, [content])
 
   return (

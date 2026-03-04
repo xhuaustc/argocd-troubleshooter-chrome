@@ -24,7 +24,7 @@ export function redactSensitiveValues(obj: unknown): any {
 
   const result: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
-    if (isSensitiveKey(key) && typeof value === 'string') {
+    if (isSensitiveKey(key)) {
       result[key] = '[REDACTED]'
     } else {
       result[key] = redactSensitiveValues(value)

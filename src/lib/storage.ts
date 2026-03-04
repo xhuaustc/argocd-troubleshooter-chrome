@@ -9,7 +9,8 @@ const DEFAULT_CONFIG: LLMConfig = {
 
 export async function loadLLMConfig(): Promise<LLMConfig> {
   const data = await chrome.storage.local.get('llmConfig')
-  return { ...DEFAULT_CONFIG, ...data.llmConfig }
+  const stored = data.llmConfig as Partial<LLMConfig> | undefined
+  return { ...DEFAULT_CONFIG, ...stored }
 }
 
 export async function saveLLMConfig(config: LLMConfig): Promise<void> {
@@ -18,7 +19,7 @@ export async function saveLLMConfig(config: LLMConfig): Promise<void> {
 
 export async function loadApiKey(): Promise<string> {
   const data = await chrome.storage.session.get('llmApiKey')
-  return data.llmApiKey ?? ''
+  return (data.llmApiKey as string) ?? ''
 }
 
 export async function saveApiKey(key: string): Promise<void> {

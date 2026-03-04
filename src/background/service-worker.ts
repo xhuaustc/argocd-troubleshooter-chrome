@@ -27,6 +27,10 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
 
 // Listen for tab activation (switching between tabs)
 chrome.tabs.onActivated.addListener(async (activeInfo) => {
-  const tab = await chrome.tabs.get(activeInfo.tabId)
-  checkTab(activeInfo.tabId, tab.url)
+  try {
+    const tab = await chrome.tabs.get(activeInfo.tabId)
+    checkTab(activeInfo.tabId, tab.url)
+  } catch {
+    // Tab may have been closed during activation event
+  }
 })

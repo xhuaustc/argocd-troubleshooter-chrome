@@ -32,7 +32,10 @@ export class LLMClient {
       throw new Error(`LLM API error: ${response.status} - ${error}`)
     }
 
-    const reader = response.body!.getReader()
+    if (!response.body) {
+      throw new Error('LLM API returned empty response body')
+    }
+    const reader = response.body.getReader()
     const decoder = new TextDecoder()
     let buffer = ''
 

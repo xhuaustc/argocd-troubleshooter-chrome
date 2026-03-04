@@ -75,6 +75,13 @@ describe('redactSensitiveValues', () => {
     expect(result).toEqual([{ password: '[REDACTED]' }, { name: 'ok' }])
   })
 
+  it('redacts non-string sensitive values', () => {
+    const input = { password: { nested: 'secret' }, token: 12345 }
+    const result = redactSensitiveValues(input)
+    expect(result.password).toBe('[REDACTED]')
+    expect(result.token).toBe('[REDACTED]')
+  })
+
   it('does not mutate input', () => {
     const input = { password: 'secret' }
     redactSensitiveValues(input)
@@ -103,7 +110,7 @@ describe('redactResourceList', () => {
     expect(result[0].data.db_password).toBe('[REDACTED]')
   })
 
-  it('preserves Secret valueFrom references', () => {
+  it('redacts secretKeyRef values in non-Secret resources', () => {
     const resources = [{
       kind: 'Deployment',
       spec: {
@@ -120,6 +127,7 @@ describe('redactResourceList', () => {
       },
     }]
     const result = redactResourceList(resources)
-    expect(result[0].spec.template.spec.containers[0].env[1].valueFrom.secretKeyRef.name).toBe('db-secret')
+    expect(result[0].spec.template.spec.containers[0].env[0].value).toBe('localhost')
+    expect(result[0].spec.template.spec.containers[0].env[1].valueFrom.secretKeyRef).toBe('[REDACTED]')
   })
 })
