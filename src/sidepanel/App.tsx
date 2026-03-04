@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { ConfigPanel } from './components/ConfigPanel'
+import { DiagnosePanel } from './components/DiagnosePanel'
 import { parseArgoAppUrl, type ArgoAppInfo } from '@/lib/url-parser'
 
 type Tab = 'diagnose' | 'config'
@@ -9,7 +10,6 @@ export function App() {
   const [appInfo, setAppInfo] = useState<ArgoAppInfo | null>(null)
 
   useEffect(() => {
-    // Get current tab URL to detect ArgoCD app
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const url = tabs[0]?.url
       if (url) {
@@ -41,21 +41,13 @@ export function App() {
       <main className="app-main">
         {activeTab === 'config' && <ConfigPanel />}
         {activeTab === 'diagnose' && (
-          <div className="diagnose-panel">
-            {appInfo ? (
-              <>
-                <div className="app-info">
-                  <strong>Application:</strong> {appInfo.appName}
-                  {appInfo.namespace && <span> ({appInfo.namespace})</span>}
-                </div>
-                <p>Diagnostic flow will be implemented in the next task.</p>
-              </>
-            ) : (
-              <p className="empty-state">
-                Navigate to an ArgoCD Application Detail page to start diagnosing.
-              </p>
-            )}
-          </div>
+          appInfo ? (
+            <DiagnosePanel appInfo={appInfo} />
+          ) : (
+            <p className="empty-state">
+              Navigate to an ArgoCD Application Detail page to start diagnosing.
+            </p>
+          )
         )}
       </main>
     </div>
