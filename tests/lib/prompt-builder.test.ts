@@ -119,4 +119,16 @@ describe('buildDiagnosticPrompt', () => {
     // Should not throw, and should have the basic structure
     expect(prompt).toContain('Application Info')
   })
+
+  it('handles null arrays from Go nil slices', () => {
+    const ctx = makeContext({
+      resourceTree: { nodes: null as unknown as [] },
+      events: { items: null as unknown as [] },
+    })
+    // Should not throw
+    const prompt = buildDiagnosticPrompt(ctx)
+    expect(prompt).toContain('Application Info')
+    expect(prompt).not.toContain('## Resource Tree')
+    expect(prompt).not.toContain('## Events')
+  })
 })

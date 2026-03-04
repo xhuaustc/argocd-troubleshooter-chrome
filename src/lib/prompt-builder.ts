@@ -86,7 +86,7 @@ export function buildDiagnosticPrompt(context: DiagnosticContext): string {
   }
 
   // Resource tree
-  if (resourceTree.nodes.length > 0) {
+  if (resourceTree.nodes?.length) {
     lines.push('')
     lines.push('## Resource Tree')
     lines.push('| Kind | Name | Namespace | Health | Message |')
@@ -99,7 +99,7 @@ export function buildDiagnosticPrompt(context: DiagnosticContext): string {
   }
 
   // Events
-  if (events.items.length > 0) {
+  if (events.items?.length) {
     lines.push('')
     lines.push('## Events')
     for (const event of events.items) {
