@@ -20,7 +20,7 @@ describe('ArgoCDClient', () => {
       const result = await client.getApplication('my-app', 'argocd')
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://argocd.example.com/api/v1/applications/argocd/my-app',
+        'https://argocd.example.com/api/v1/applications/my-app?appNamespace=argocd',
         expect.objectContaining({
           headers: expect.objectContaining({
             Authorization: 'Bearer test-token',
@@ -62,7 +62,7 @@ describe('ArgoCDClient', () => {
       const result = await client.getResourceTree('my-app', 'argocd')
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://argocd.example.com/api/v1/applications/argocd/my-app/resource-tree',
+        'https://argocd.example.com/api/v1/applications/my-app/resource-tree?appNamespace=argocd',
         expect.any(Object),
       )
       expect(result).toEqual(mockTree)
@@ -77,7 +77,7 @@ describe('ArgoCDClient', () => {
       const result = await client.getEvents('my-app', 'argocd')
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://argocd.example.com/api/v1/applications/argocd/my-app/events',
+        'https://argocd.example.com/api/v1/applications/my-app/events?appNamespace=argocd',
         expect.any(Object),
       )
       expect(result).toEqual(mockEvents)

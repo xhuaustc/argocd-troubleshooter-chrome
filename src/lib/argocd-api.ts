@@ -20,8 +20,12 @@ export class ArgoCDClient {
     return res.json()
   }
 
-  private appPath(name: string, namespace?: string): string {
-    return namespace ? `/api/v1/applications/${namespace}/${name}` : `/api/v1/applications/${name}`
+  private appPath(name: string, namespace?: string, suffix?: string): string {
+    const base = `/api/v1/applications/${encodeURIComponent(name)}${suffix ?? ''}`
+    if (namespace) {
+      return `${base}${base.includes('?') ? '&' : '?'}appNamespace=${encodeURIComponent(namespace)}`
+    }
+    return base
   }
 
   async getApplication(name: string, namespace?: string): Promise<ArgoApplication> {
@@ -29,10 +33,10 @@ export class ArgoCDClient {
   }
 
   async getResourceTree(name: string, namespace?: string): Promise<ResourceTree> {
-    return this.request(`${this.appPath(name, namespace)}/resource-tree`)
+    return this.request(this.appPath(name, namespace, '/resource-tree'))
   }
 
   async getEvents(name: string, namespace?: string): Promise<EventList> {
-    return this.request(`${this.appPath(name, namespace)}/events`)
+    return this.request(this.appPath(name, namespace, '/events'))
   }
 }
