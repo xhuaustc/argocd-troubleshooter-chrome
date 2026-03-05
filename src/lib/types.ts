@@ -127,4 +127,5 @@ export interface DiagnosticContext {
   application: ArgoApplication
   resourceTree: ResourceTree
   events: EventList
+  podLogs?: Record<string, string>  // "namespace/podName" -> log text
 }

@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react'
 import { loadLLMConfig, saveLLMConfig, loadApiKey, saveApiKey } from '@/lib/storage'
 import { LLMClient } from '@/lib/llm-client'
 import type { LLMConfig } from '@/lib/types'
+import { useI18n } from '../I18nProvider'
+import type { Language } from '@/lib/i18n'
 
 export function ConfigPanel() {
+  const { t, language, setLanguage } = useI18n()
   const [config, setConfig] = useState<LLMConfig>({
     endpoint: 'https://api.openai.com/v1',
     model: 'gpt-4o',
@@ -37,7 +40,18 @@ export function ConfigPanel() {
   return (
     <div className="config-panel">
       <div className="form-group">
-        <label>Preset</label>
+        <label>{t('languageLabel')}</label>
+        <select
+          value={language}
+          onChange={(e) => setLanguage(e.target.value as Language)}
+        >
+          <option value="en">English</option>
+          <option value="zh">中文</option>
+        </select>
+      </div>
+
+      <div className="form-group">
+        <label>{t('presetLabel')}</label>
         <select
           value="custom"
           onChange={(e) => {
@@ -49,14 +63,14 @@ export function ConfigPanel() {
             if (preset) setConfig((c) => ({ ...c, ...preset }))
           }}
         >
-          <option value="custom">Custom</option>
-          <option value="openai">OpenAI</option>
-          <option value="anthropic">Anthropic (requires adapter)</option>
+          <option value="custom">{t('presetCustom')}</option>
+          <option value="openai">{t('presetOpenAI')}</option>
+          <option value="anthropic">{t('presetAnthropic')}</option>
         </select>
       </div>
 
       <div className="form-group">
-        <label>API Endpoint</label>
+        <label>{t('apiEndpointLabel')}</label>
         <input
           type="url"
           value={config.endpoint}
@@ -66,18 +80,18 @@ export function ConfigPanel() {
       </div>
 
       <div className="form-group">
-        <label>API Key</label>
+        <label>{t('apiKeyLabel')}</label>
         <input
           type="password"
           value={apiKey}
           onChange={(e) => setApiKey(e.target.value)}
           placeholder="sk-..."
         />
-        <small>Stored in session only. Cleared when browser closes.</small>
+        <small>{t('apiKeyHint')}</small>
       </div>
 
       <div className="form-group">
-        <label>Model</label>
+        <label>{t('modelLabel')}</label>
         <input
           type="text"
           value={config.model}
@@ -87,9 +101,9 @@ export function ConfigPanel() {
       </div>
 
       <details className="advanced-settings">
-        <summary>Advanced Settings</summary>
+        <summary>{t('advancedSettings')}</summary>
         <div className="form-group">
-          <label>Temperature: {config.temperature}</label>
+          <label>{t('temperatureLabel')}: {config.temperature}</label>
           <input
             type="range"
             min="0"
@@ -100,7 +114,7 @@ export function ConfigPanel() {
           />
         </div>
         <div className="form-group">
-          <label>Max Tokens</label>
+          <label>{t('maxTokensLabel')}</label>
           <input
             type="number"
             value={config.maxTokens}
@@ -111,10 +125,10 @@ export function ConfigPanel() {
 
       <div className="button-group">
         <button onClick={handleTest} disabled={!apiKey || status === 'testing'}>
-          {status === 'testing' ? 'Testing...' : status === 'success' ? 'Connected!' : status === 'error' ? 'Failed' : 'Test Connection'}
+          {status === 'testing' ? t('btnTesting') : status === 'success' ? t('btnConnected') : status === 'error' ? t('btnFailed') : t('btnTestConnection')}
         </button>
         <button className="primary" onClick={handleSave}>
-          {saved ? 'Saved!' : 'Save'}
+          {saved ? t('btnSaved') : t('btnSave')}
         </button>
       </div>
     </div>

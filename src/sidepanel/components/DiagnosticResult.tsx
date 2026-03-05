@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
+import { useI18n } from '../I18nProvider'
 
 interface DiagnosticResultProps {
   content: string
@@ -8,6 +9,7 @@ interface DiagnosticResultProps {
 }
 
 export function DiagnosticResult({ content, isStreaming }: DiagnosticResultProps) {
+  const { t } = useI18n()
   const html = useMemo(() => {
     if (!content) return ''
     const raw = marked.parse(content, { async: false }) as string
@@ -19,7 +21,7 @@ export function DiagnosticResult({ content, isStreaming }: DiagnosticResultProps
       {isStreaming && (
         <div className="loading">
           <div className="spinner" />
-          <span>Analyzing...</span>
+          <span>{t('analyzing')}</span>
         </div>
       )}
       {content && (

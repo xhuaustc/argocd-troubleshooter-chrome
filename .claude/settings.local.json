@@ -10,7 +10,9 @@
       "Bash(pnpm build:*)",
       "Bash(pnpm test:*)",
       "Bash(pnpm run:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(pnpm rebuild:*)",
+      "Bash(node:*)"
     ],
     "deny": [
       "WebFetch"

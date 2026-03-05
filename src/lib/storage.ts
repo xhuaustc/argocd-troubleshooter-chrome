@@ -1,4 +1,5 @@
 import type { LLMConfig } from './types'
+import type { Language } from './i18n'
 
 const DEFAULT_CONFIG: LLMConfig = {
   endpoint: 'https://api.openai.com/v1',
@@ -24,4 +25,13 @@ export async function loadApiKey(): Promise<string> {
 
 export async function saveApiKey(key: string): Promise<void> {
   await chrome.storage.session.set({ llmApiKey: key })
+}
+
+export async function loadLanguage(): Promise<Language> {
+  const data = await chrome.storage.local.get('language')
+  return (data.language as Language) ?? 'en'
+}
+
+export async function saveLanguage(lang: Language): Promise<void> {
+  await chrome.storage.local.set({ language: lang })
 }
