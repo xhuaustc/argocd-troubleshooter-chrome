@@ -6,28 +6,25 @@ const SYNC_SUCCESS_STATUSES = new Set(['Synced', 'SyncedAndPruned', 'Pruned'])
 
 export const SYSTEM_PROMPT = `You are an expert Kubernetes and ArgoCD troubleshooting assistant.
 
-When analyzing issues, respond with this structure:
+Respond with this structure:
 
 ## Problem Summary
-[One sentence summarizing the core issue]
+[One sentence. Reference the root resource by Kind/Name.]
 
 ## Root Cause Analysis
-[Causal chain referencing specific resources by Kind/Name]
+[Causal chain: Kind/Name → Kind/Name → symptom. No background explanation.]
 
 ## Fix Steps
-1. [Actionable step with target resource and suggested change]
+[Numbered list. Each step: one command or one file change — include the exact field/value to modify. GitOps only (edit Git repo, then ArgoCD sync). No kubectl apply/edit.]
 
 ## Verification
-[How to verify the fix after syncing]
+[One-liner: the single command or ArgoCD UI check that confirms the fix.]
 
-Be concise. Focus on the root cause and actionable fix steps. Do not repeat the diagnostic data back.
-
-Important guidelines:
-- Always recommend GitOps workflow (modify Git repo, then sync via ArgoCD) - never suggest direct kubectl apply/edit
-- Never suggest bypassing security controls or weakening RBAC/SecurityContext
-- Mark high-risk suggestions with a WARNING label
-- If information is insufficient for a confident diagnosis, clearly state what additional info would help
-- Reference resources by Kind/Name format so they can be linked in the UI`
+Rules:
+- Be concise — no filler, no repeating diagnostic data
+- Reference resources as Kind/Name
+- Mark high-risk suggestions with WARNING
+- If info is insufficient, state what is missing instead of guessing`
 
 export function getSystemPrompt(lang: Language): string {
   if (lang === 'zh') {
@@ -70,6 +67,27 @@ export function collectUnhealthySubtreeKeys(tree: ResourceTree): Set<string> {
   return new Set(
     collectUnhealthySubtreeNodes(tree).map(n => `${n.kind}/${n.name}`),
   )
+}
+
+export function isApplicationHealthy(context: DiagnosticContext): boolean {
+  const { application, resourceTree, events } = context
+  const health = application.status.health.status
+  const sync = application.status.sync.status
+
+  if (!HEALTHY_STATUSES.has(health) || sync !== 'Synced') return false
+  if (application.status.conditions?.length) return false
+
+  const unhealthyNodes = (resourceTree.nodes ?? []).filter(isUnhealthy)
+  if (unhealthyNodes.length) return false
+
+  const hasWarningEvents = events.items?.some(e => e.type === 'Warning')
+  if (hasWarningEvents) return false
+
+  if (application.status.operationState && application.status.operationState.phase !== 'Succeeded') {
+    return false
+  }
+
+  return true
 }
 
 export function buildDiagnosticPrompt(context: DiagnosticContext): string {

@@ -4,7 +4,7 @@ import type { DiagnosticContext } from '@/lib/types'
 import { getArgoCDToken } from '@/lib/auth'
 import { ArgoCDClient } from '@/lib/argocd-api'
 import { redactSensitiveValues } from '@/lib/redaction'
-import { buildDiagnosticPrompt, getSystemPrompt, collectUnhealthySubtreeNodes } from '@/lib/prompt-builder'
+import { buildDiagnosticPrompt, getSystemPrompt, collectUnhealthySubtreeNodes, isApplicationHealthy } from '@/lib/prompt-builder'
 import { LLMClient } from '@/lib/llm-client'
 import { loadLLMConfig, loadApiKey } from '@/lib/storage'
 import { ContentPreview } from './ContentPreview'
@@ -23,6 +23,7 @@ export function DiagnosePanel({ appInfo }: DiagnosePanelProps) {
   const [promptContent, setPromptContent] = useState('')
   const [result, setResult] = useState('')
   const [error, setError] = useState('')
+  const [copied, setCopied] = useState(false)
 
   // Reset to idle when the user switches to a different application
   useEffect(() => {
@@ -72,12 +73,20 @@ export function DiagnosePanel({ appInfo }: DiagnosePanelProps) {
       }
     }
 
-    // Fetch logs for unhealthy pods
+    // Fetch logs for unhealthy pods (max 2 per parent ReplicaSet)
     const unhealthyPods = subtreeNodes.filter(n => n.kind === 'Pod')
+    const parentCount = new Map<string, number>()
+    const limitedPods = unhealthyPods.filter(pod => {
+      const parentUid = pod.parentRefs?.[0]?.uid ?? ''
+      const count = parentCount.get(parentUid) ?? 0
+      if (count >= 2) return false
+      parentCount.set(parentUid, count + 1)
+      return true
+    })
     const podLogs: Record<string, string> = {}
-    if (unhealthyPods.length) {
+    if (limitedPods.length) {
       const logResults = await Promise.all(
-        unhealthyPods.map(pod =>
+        limitedPods.map(pod =>
           client.getPodLogs(
             appInfo.appName, pod.name, pod.namespace,
             appInfo.namespace ?? undefined,
@@ -101,10 +110,17 @@ export function DiagnosePanel({ appInfo }: DiagnosePanelProps) {
       // Step 1: Collect data from ArgoCD API
       const context = await collectData()
 
-      // Step 2: Redact sensitive data
+      // Step 2: If healthy, skip LLM and show result directly
+      if (isApplicationHealthy(context)) {
+        setResult(t('healthyResult'))
+        setPhase('done')
+        return
+      }
+
+      // Step 3: Redact sensitive data
       const redactedContext = redactSensitiveValues(context)
 
-      // Step 3: Build prompt and show preview
+      // Step 4: Build prompt and show preview
       const prompt = buildDiagnosticPrompt(redactedContext)
       setPromptContent(prompt)
       setPhase('preview')
@@ -144,6 +160,12 @@ export function DiagnosePanel({ appInfo }: DiagnosePanelProps) {
     }
   }, [promptContent, language, t])
 
+  const handleCopy = useCallback(async () => {
+    await navigator.clipboard.writeText(promptContent)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }, [promptContent])
+
   return (
     <div className="diagnose-panel">
       <div className="app-info">
@@ -172,6 +194,9 @@ export function DiagnosePanel({ appInfo }: DiagnosePanelProps) {
           </p>
           <div className="button-group">
             <button onClick={() => setPhase('idle')}>{t('btnCancel')}</button>
+            <button onClick={handleCopy}>
+              {copied ? t('btnCopied') : t('btnCopy')}
+            </button>
             <button className="primary" onClick={handleSendToLLM}>
               {t('btnSendToLLM')}
             </button>

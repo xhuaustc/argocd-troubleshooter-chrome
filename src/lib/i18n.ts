@@ -33,6 +33,8 @@ const en = {
   collectingData: 'Collecting data from ArgoCD...',
   previewDisclaimer: 'The above data will be sent to your configured LLM. Review it before proceeding.',
   btnCancel: 'Cancel',
+  btnCopy: 'Copy',
+  btnCopied: 'Copied!',
   btnSendToLLM: 'Send to LLM',
   btnReDiagnose: 'Re-diagnose',
   btnTryAgain: 'Try Again',
@@ -40,6 +42,8 @@ const en = {
   errorCollectFailed: 'Failed to collect data',
   errorNoApiKey: 'LLM API key not configured. Go to Settings tab.',
   errorLLMFailed: 'LLM request failed',
+
+  healthyResult: 'The application is perfectly healthy. All resources are synced and running normally.',
 
   // ContentPreview
   viewDataSent: 'View data being sent to LLM',
@@ -81,6 +85,8 @@ const zh: Record<keyof typeof en, string> = {
   collectingData: '正在从 ArgoCD 收集数据...',
   previewDisclaimer: '以上数据将发送到您配置的 LLM，请在继续之前进行检查。',
   btnCancel: '取消',
+  btnCopy: '复制',
+  btnCopied: '已复制！',
   btnSendToLLM: '发送到 LLM',
   btnReDiagnose: '重新诊断',
   btnTryAgain: '重试',
@@ -88,6 +94,8 @@ const zh: Record<keyof typeof en, string> = {
   errorCollectFailed: '数据收集失败',
   errorNoApiKey: 'LLM API 密钥未配置，请前往设置页面。',
   errorLLMFailed: 'LLM 请求失败',
+
+  healthyResult: '应用非常健康，所有资源已同步且运行正常。',
 
   // ContentPreview
   viewDataSent: '查看发送到 LLM 的数据',

@@ -38,7 +38,7 @@ describe('SYSTEM_PROMPT', () => {
 
   it('includes concise response guideline', () => {
     expect(SYSTEM_PROMPT).toContain('Be concise')
-    expect(SYSTEM_PROMPT).toContain('Do not repeat the diagnostic data back')
+    expect(SYSTEM_PROMPT).toContain('no repeating diagnostic data')
   })
 
   it('does not include Severity or Affected Resources sections', () => {
